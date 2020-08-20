@@ -25,7 +25,7 @@ def selectJrand(i, m):
     return j
 
 
-def cliAplha(aj, H, L):
+def clipAlpha(aj, H, L):
     if aj > H:
         aj = H
     if aj < L:
