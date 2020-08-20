@@ -99,6 +99,7 @@ def innerL(i, oS):
     else:
         return 0
 
+
 # platt SMO外循环代码
 def smoP(dataMatIn, classLabels, C, toler, maxIter, kTup=('lin', 0)):
     oS = optStruct(mat(dataMatIn), mat(classLabels).transpose(), C, toler)
@@ -127,7 +128,7 @@ def smoP(dataMatIn, classLabels, C, toler, maxIter, kTup=('lin', 0)):
 
 
 def testDigits(kTrup=('rbf', 10)):
-    trainingDigits = 'D:\\panrui\\我的桌面\\learning file\\machinelearninginaction\\Ch06\\digits\\trainingDigits'
+    trainingDigits = 'F:\\panrui\\我的桌面\\learning file\\machinelearninginaction\\Ch06\\trainingDigits'
     dataArr, labelArr = loadImages(trainingDigits)
     b, alphas = smoP(dataArr, labelArr, 200, 0.0001, 10000, kTrup)
     datMat = mat(dataArr)
