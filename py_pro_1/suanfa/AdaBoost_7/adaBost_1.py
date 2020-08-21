@@ -3,7 +3,9 @@
 AdaBoost为每个分类器都分配了一个权重值alpha，这些alpha值是基于每个弱分类器的错误
 率进行计算的。
 """
-from numpy import matrix, shape, ones, mat, zeros, inf
+from operator import le
+
+from numpy import matrix, shape, ones, mat, zeros, inf, log, multiply, exp, sign
 
 """
 np.matrix([[1, 2], [3, 4]])
@@ -12,6 +14,7 @@ np.matrix([[1, 2], [3, 4]])
 
 
 """
+
 
 def loadSimpleData():
     datMat = matrix([[1.0, 2.1], [2.0, 1.1], [1.3, 1.0], [1.0, 1.], [2., 1.]])
@@ -92,10 +95,53 @@ def buildStump(dataArr, classLabels, D):
     return bestStump, minError, bestClassEst
 
 
+"""程序清单7-2
+输入参数：数据集，类别标签，迭代次数
+"""
+
+
+def adaBoostTrainDs(dataArr, classLabels, numIt=40):
+    """基于单层决策树的AdaBoost训练过程"""
+    weakClassArr = []
+    m = shape(dataArr)[0]
+    D = mat(ones((m, 1)) / m)
+    aggClassEst = mat(zeros((m, 1)))
+    for i in range(numIt):
+        # 返回值为：具有最小错误率的单层决策树，最小的错误率，估计的类别向量
+        bestStump, error, classEst = buildStump(dataArr, classLabels, D)
+        print("D: %s" % D.T)
+        alpha = float(0.5 * log((1.0 - error) / max((error, 1e-16))))
+        bestStump['alpha'] = alpha
+        weakClassArr.append(bestStump)
+        print('classEst: %s' % classEst.T)
+        expon = multiply(-1 * alpha * mat(classLabels).T, classEst)
+        D = multiply(D, exp(expon))
+        D = D / D.sum()
+        aggClassEst += alpha * classEst
+        print('aggClassEst: %s ' % aggClassEst.T)
+        aggErrors = multiply(sign(aggClassEst) != mat(classLabels).T, ones((m, 1)))
+        errorRate = aggErrors.sum() / m
+        print('total error: %s ,\n' % errorRate)
+        if errorRate == 0.0:
+            break
+    return weakClassArr
+
+
+def adaClassify(datToClass, classifierArr):
+    """AdaBoost分类函数"""
+    datMatrix = mat(datToClass)
+    m = shape(datMatrix)[0]
+    aggClassEst = mat(zeros((m, 1)))
+    for i in range(len(classifierArr)):
+        classEst = stumpClassify(datMatrix, classifierArr[i]['dim'],
+                                 classifierArr[i]['thresh'],
+                                 classifierArr[i]['ineq'])
+
+
+
 if __name__ == '__main__':
     D = mat(ones((5, 1)) / 5)
     datMat, classLabels = loadSimpleData()
     # print(datMat)
-    buildStump(datMat, classLabels, D)
-
-
+    # buildStump(datMat, classLabels, D)
+    adaBoostTrainDs(datMat, classLabels, 9)
